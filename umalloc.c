@@ -6,6 +6,7 @@
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
 
+
 typedef long Align;
 
 union header {
@@ -87,4 +88,51 @@ malloc(uint nbytes)
       if((p = morecore(nunits)) == 0)
         return 0;
   }
+}
+
+void*
+pmalloc(){
+    char *p;
+    Header *hp;
+    uint nu=512;
+
+    p = sbrk(nu * sizeof(Header));
+    if(p == (char*)-1)
+        return 0;
+    hp = (Header*)p;
+    hp->s.size = nu;
+    free((void*)(hp + 1));
+
+    Header* con=freep;
+
+    // TODO:hear we need to raise the flag of con with a syscall which gets con
+    /*
+     * as i understands we need to use xor on the the flag PTE_A3_PROT I added.
+     * I think an example for flag raising can be found in vm.c line 73.
+     */
+
+    return con;
+}
+
+int
+protect_page(void* ap){
+    /*
+     * TODO: need to call a sys call that do the following thing:
+     *  1. check that the ap has the PTE_A3_PROT flag raised.
+     *  2. check that the offset is 0
+     *  3. turn of the flag PT_W.
+     *  if 1,2 are false return -1
+     */
+}
+
+Int pfree(void* ap){
+    /*
+     * TODO: need to call 3 sys calls:
+     *  1. syscall that checks if the flag PTE_A3_PROT is on other wis retur -1;
+     *  2. syscall that check if the flag PTE_W is raised.
+     *  3. syscall that turn on the PTE_W flag.
+     */
+
+    free(ap);
+    return 1;
 }

@@ -80,6 +80,14 @@ trap(struct trapframe *tf)
 
   //PAGEBREAK: 13
   default:
+    uint page=rcr2();
+    /*
+     * TODO: Use sysCall to check if in the address got from the call
+     *  walkpgdir(myproc()->pgdir,page,1)
+     *  the PET_W flag is Down. if so change the tf->trapno to 13
+     *
+     */
+
     if(myproc() == 0 || (tf->cs&3) == 0){
       // In kernel, it must be our mistake.
       cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",

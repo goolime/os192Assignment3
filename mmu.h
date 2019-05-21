@@ -140,7 +140,8 @@ struct segdesc {
 #define PTE_A           0x020   // Accessed
 #define PTE_D           0x040   // Dirty
 #define PTE_PS          0x080   // Page Size
-#define PTE_MBZ         0x180   // Bits must be zero
+#define PTE_MBZ         0x180   // Bits must be zero'
+#define PTE_A3_PROT     0x400   // Protection bit - Assignment 3
 
 // Address in page table or page directory entry
 #define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF)
