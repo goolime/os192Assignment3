@@ -84,6 +84,7 @@ sys_sleep(void)
   return 0;
 }
 
+
 // return how many clock tick interrupts have occurred
 // since start.
 int
@@ -95,4 +96,30 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+int sys_checkflag(void) {
+    pte_t *pte;
+    uint flag;
+    if (argptr(0, (char **) &pte, 0) < 0 || argptr(1, (void *) &flag, 0) < 0)
+        return -1;
+    return checkflag(pte, flag);
+}
+
+int sys_turn_on_flag(void) {
+    pte_t *pte;
+    uint flag;
+    if (argptr(0, (char **) &pte, 0) < 0 || argptr(1, (void *) &flag, 0) < 0)
+        return -1;
+    turn_on_flag(pte, flag);
+    return 0;  // not reached
+}
+
+int sys_turn_off_flag(void) {
+    pte_t *pte;
+    uint flag;
+    if (argptr(0, (char **) &pte, 0) < 0 || argptr(1, (void*) &flag, 0) < 0)
+        return -1;
+    turn_off_flag(pte, flag);
+    return 0;  // not reached
 }

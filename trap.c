@@ -80,7 +80,7 @@ trap(struct trapframe *tf)
 
   //PAGEBREAK: 13
   default:
-    uint page=rcr2();
+//    uint page=rcr2();
     /*
      * TODO: Use sysCall to check if in the address got from the call
      *  walkpgdir(myproc()->pgdir,page,1)

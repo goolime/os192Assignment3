@@ -24,6 +24,9 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int yield(void);
+int checkflag(pde_t, uint);
+void turn_on_flag(pde_t, uint);
+void turn_on_flag(pde_t, uint);
 
 // ulib.c
 int stat(char*, struct stat*);

@@ -11,16 +11,16 @@ typedef long Align;
 
 union header {
   struct {
-    union header *ptr;
-    uint size;
+    union header *ptr;  // next block if on free list
+    uint size;  // size of this block
   } s;
-  Align x;
+  Align x;  // force alignment of blocks
 };
 
 typedef union header Header;
 
-static Header base;
-static Header *freep;
+static Header base; // empty list to get started
+static Header *freep;   // start of free list
 
 void
 free(void *ap)
@@ -68,15 +68,15 @@ malloc(uint nbytes)
   uint nunits;
 
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
-  if((prevp = freep) == 0){
+  if((prevp = freep) == 0){ // no free list yet
     base.s.ptr = freep = prevp = &base;
     base.s.size = 0;
   }
   for(p = prevp->s.ptr; ; prevp = p, p = p->s.ptr){
-    if(p->s.size >= nunits){
-      if(p->s.size == nunits)
+    if(p->s.size >= nunits){    // big enough
+      if(p->s.size == nunits)   // exactly
         prevp->s.ptr = p->s.ptr;
-      else {
+      else {    // allocate tail end
         p->s.size -= nunits;
         p += p->s.size;
         p->s.size = nunits;
@@ -84,11 +84,31 @@ malloc(uint nbytes)
       freep = prevp;
       return (void*)(p + 1);
     }
-    if(p == freep)
+    if(p == freep)  // wrapped around free list
       if((p = morecore(nunits)) == 0)
-        return 0;
+        return 0;   // none left
   }
 }
+//
+//static Header *
+//pmorecore(uint nu) {
+//    char *p;
+//    Header *hp;
+//
+//    p = sbrk(nu * sizeof(Header));
+//    if (p == (char *) -1)
+//        return 0;
+//    hp = (Header *) p;
+//    hp->s.size = nu;
+//    free((void *) (hp + 1));
+//    return freep;
+//}
+//
+//void*
+//pmalloc(){
+//    Header *p = pmorecore(512);
+//
+//}
 
 void*
 pmalloc(){

@@ -383,6 +383,18 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
+int checkflag(pde_t *pgdir, uint flag){
+    return 0;
+// TODO
+}
+
+void turn_on_flag(pde_t *pgdir, uint flag){
+// TODO
+}
+
+void turn_off_flag(pde_t *pgdir, uint flag) {
+// TODO
+}
 //PAGEBREAK!
 // Blank page.
 //PAGEBREAK!

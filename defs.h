@@ -193,8 +193,11 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
+int             checkflag(pde_t *pgdir, uint flag);
+void            turn_on_flag(pde_t *pgdir, uint flag);
+void            turn_off_flag(pde_t *pgdir, uint flag);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
-
-pte_t *         walkpgdir(pde_t *pgdir, const void *va, int alloc);
+//
+//pte_t *         walkpgdir(pde_t *pgdir, const void *va, int alloc);

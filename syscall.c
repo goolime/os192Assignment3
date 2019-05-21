@@ -105,6 +105,10 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_yield(void);
 
+extern int sys_checkflag(void);
+extern int sys_turn_on_flag(void);
+extern int sys_turn_off_flag(void);
+
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
@@ -128,6 +132,9 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_yield]   sys_yield,
+[SYS_checkflag] sys_checkflag,
+[SYS_checkflag] sys_turn_on_flag,
+[SYS_checkflag] sys_turn_off_flag,
 };
 
 void
