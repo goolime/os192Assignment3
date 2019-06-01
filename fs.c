@@ -810,4 +810,52 @@ readFromSwapFile(struct proc * p, char* buffer, uint placeOnFile, uint size)
 }
 
 
+int writePageToFile(struct proc *p, uint vAdd, pde_t *pgdir) {
+    int freeSpot = -1;
+    int ret;
+    for (int i = 0; i < MAX_PSYC_PAGES; i++)
+        if (!p->filePagesTable[i].isUsed) {
+            freeSpot = i;
+            break;
+        }
+    ret = writeToSwapFile(p, (char *) vAdd, PGSIZE * freeSpot, PGSIZE);
+    if (ret == -1)
+        return -1;
+    p->filePagesTable[freeSpot].isUsed = 1;
+    p->filePagesTable[freeSpot].vAdd = vAdd;
+    p->filePagesTable[freeSpot].pgdir = pgdir;
+    return ret;
+}
+
+int readPageFromFile(struct proc *p, int vAdd, int memLocation, char *buff) {
+    int i, ret;
+    for (i = 0; i < MAX_PSYC_PAGES; i++) {
+        if (p->filePagesTable[i].vAdd == vAdd) {
+            ret = readFromSwapFile(p, buff, i * PGSIZE, PGSIZE);
+            if (ret == -1)
+                break;
+            p->memPagesTable[memLocation] = p->filePagesTable[i];
+            p->filePagesTable[i].isUsed = 0;
+
+//#ifdef AQ
+//            int i;
+//        for(i=0;i<MAX_PSYC_PAGES-1;i++){
+//          p->inMemPagesTable[i+1] = p->inMemPagesTable[i];
+//        }
+//
+//        struct pgstruct toAdd;
+//        toAdd.vAdd = vAdd;
+//        toAdd.isUsed = 1;
+//        toAdd.SCFIFOloadOrder = 0;
+//        toAdd.NFUAcounter = 0;
+//        p->inMemPagesTable[0] = toAdd;
+//#endif
+            return ret;
+        }
+    }
+    //  if reached here - physical address given is not paged out (not found)
+    return -1;
+}
+
+
 

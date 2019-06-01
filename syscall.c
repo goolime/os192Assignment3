@@ -105,9 +105,10 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_yield(void);
 
-extern int sys_checkflag(void);
-extern int sys_turn_on_flag(void);
-extern int sys_turn_off_flag(void);
+extern int sys_turn_on_protect_bit(void);
+extern int sys_make_pa_read_only(void);
+extern int sys_turn_on_writeable_bit(void);
+extern int sys_is_protected_page(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -132,9 +133,10 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_yield]   sys_yield,
-[SYS_checkflag] sys_checkflag,
-[SYS_checkflag] sys_turn_on_flag,
-[SYS_checkflag] sys_turn_off_flag,
+[SYS_turn_on_protect_bit] sys_turn_on_protect_bit,
+[SYS_make_pa_read_only] sys_make_pa_read_only,
+//[SYS_turn_on_writeable_bit] sys_turn_on_writeable_bit,
+[SYS_is_protected_page] sys_is_protected_page,
 };
 
 void

@@ -98,28 +98,26 @@ sys_uptime(void)
   return xticks;
 }
 
-int sys_checkflag(void) {
-    pte_t *pte;
-    uint flag;
-    if (argptr(0, (char **) &pte, 0) < 0 || argptr(1, (void *) &flag, 0) < 0)
+int sys_turn_on_protect_bit(void) {
+    void *va;
+    if (argptr(0, (char **) &va, 0) < 0)
         return -1;
-    return checkflag(pte, flag);
+    turn_on_protect_bit(va);
+    return 0;   //not reached
 }
 
-int sys_turn_on_flag(void) {
-    pte_t *pte;
-    uint flag;
-    if (argptr(0, (char **) &pte, 0) < 0 || argptr(1, (void *) &flag, 0) < 0)
+int sys_make_pa_read_only(void) {
+    void *va;
+    if (argptr(0, (char **) &va, 0) < 0 )
         return -1;
-    turn_on_flag(pte, flag);
+    make_pa_read_only(va);
     return 0;  // not reached
 }
 
-int sys_turn_off_flag(void) {
-    pte_t *pte;
-    uint flag;
-    if (argptr(0, (char **) &pte, 0) < 0 || argptr(1, (void*) &flag, 0) < 0)
+int sys_is_protected_page(void) {
+    void *va;
+    if (argptr(0, (char **) &va, 0) < 0)
         return -1;
-    turn_off_flag(pte, flag);
+    is_protected_page(va);
     return 0;  // not reached
 }

@@ -1,3 +1,5 @@
+
+
 // Per-CPU state
 struct cpu {
   uchar apicid;                // Local APIC ID
@@ -34,6 +36,17 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+struct PageInfo {
+    uint vAdd; //
+    int isUsed;  //to know if this item is in the file/memory or not
+    pde_t *pgdir;
+
+
+//    int AQindex;
+//    uint NFUAcounter;   //for NFUA algorithm
+//    uint SCFIFOloadOrder; //for SCFIFO algorithm
+};
+
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -52,6 +65,11 @@ struct proc {
 
   //Swap file. must initiate with create swap file
   struct file *swapFile;      //page file
+
+  int numOfFilePages;
+  int numOfMemPages;
+  struct PageInfo filePagesTable[MAX_PSYC_PAGES]; // array of pages located in the file
+  struct PageInfo memPagesTable[MAX_PSYC_PAGES];  // array of pages located in the ram
 };
 
 // Process memory is laid out contiguously, low addresses first:

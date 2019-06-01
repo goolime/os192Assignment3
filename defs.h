@@ -57,6 +57,10 @@ int		readFromSwapFile(struct proc * p, char* buffer, uint placeOnFile, uint size
 int		writeToSwapFile(struct proc* p, char* buffer, uint placeOnFile, uint size);
 int		removeSwapFile(struct proc* p);
 
+int     writePageToFile(struct proc *p, uint vAdd, pde_t *pgdir);
+int     readPageFromFile(struct proc *p, int vAdd, int memLocation, char *buff);
+
+
 // ide.c
 void            ideinit(void);
 void            ideintr(void);
@@ -193,9 +197,13 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
-int             checkflag(pde_t *pgdir, uint flag);
-void            turn_on_flag(pde_t *pgdir, uint flag);
-void            turn_off_flag(pde_t *pgdir, uint flag);
+void            turn_on_protect_bit(void *);
+void            make_pa_read_only(void *);
+void            turn_on_writeable_bit(void *);
+int             is_protected_page(void *);
+
+int             checkIfPageInsideFile(struct proc *p, int vAdd);
+void            pageFromFile(struct proc *p, int vAdd);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

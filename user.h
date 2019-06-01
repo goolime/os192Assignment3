@@ -24,9 +24,11 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int yield(void);
-int checkflag(pde_t, uint);
-void turn_on_flag(pde_t, uint);
-void turn_on_flag(pde_t, uint);
+
+void turn_on_protect_bit(void *);
+void make_pa_read_only(void *);
+void turn_on_writeable_bit(void *);
+int is_protected_page(void *);
 
 // ulib.c
 int stat(char*, struct stat*);
