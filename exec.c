@@ -38,6 +38,15 @@ exec(char *path, char **argv)
   if((pgdir = setupkvm()) == 0)
     goto bad;
 
+  // task2.3
+  for (i = 0; i < MAX_PSYC_PAGES; i++) {
+      curproc->numOfMemPages = 0;
+      curproc->filePagesTable[i].vAdd = 0;
+      curproc->filePagesTable[i].isUsed = 0;
+
+      curproc->memPagesTable[i].vAdd = 0;
+      curproc->memPagesTable[i].isUsed = 0;
+  }
   // Load program into memory.
   sz = 0;
   for(i=0, off=elf.phoff; i<elf.phnum; i++, off+=sizeof(ph)){
