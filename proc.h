@@ -40,6 +40,7 @@ struct PageInfo {
     uint vAdd; //
     int isUsed;  //to know if this item is in the file/memory or not
     pde_t *pgdir;
+    int loadOrder;
 
 
 //    int AQindex;
@@ -70,6 +71,7 @@ struct proc {
   int numOfMemPages;
   struct PageInfo filePagesTable[MAX_PSYC_PAGES]; // array of pages located in the file
   struct PageInfo memPagesTable[MAX_PSYC_PAGES];  // array of pages located in the ram
+  int loadOrderCounter;
 };
 
 // Process memory is laid out contiguously, low addresses first:

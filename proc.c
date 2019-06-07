@@ -111,6 +111,9 @@ allocproc(void) {
     memset(p->context, 0, sizeof *p->context);
     p->context->eip = (uint) forkret;
 
+    // task3
+    p->loadOrderCounter = 0;
+
     // task2.3
     if (p->pid > 2) {
         createSwapFile(p);
@@ -118,8 +121,11 @@ allocproc(void) {
         for (i = 0; i < MAX_PSYC_PAGES; i++) {
             p->filePagesTable[i].vAdd = 0;
             p->filePagesTable[i].isUsed = 0;
+            p->filePagesTable[i].loadOrder = 0;
+
             p->memPagesTable[i].vAdd = 0;
             p->memPagesTable[i].isUsed = 0;
+            p->memPagesTable[i].loadOrder = 0;
         }
     }
     return p;
@@ -215,6 +221,9 @@ fork(void) {
                 panic("fork error: task 2.3 addition");
             offset += numread;
         }
+
+        // task3
+        np->loadOrderCounter = curproc->loadOrderCounter;
 
         for (i = 0; i < MAX_PSYC_PAGES; i++) {
             np->filePagesTable[i] = curproc->filePagesTable[i];

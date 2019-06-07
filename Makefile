@@ -71,6 +71,24 @@ QEMU = $(shell if which qemu > /dev/null; \
 	echo "***" 1>&2; exit 1)
 endif
 
+
+ifdef SELECTION=LIFO
+  SELECTION :=LIFO
+endif
+
+ifdef SELECTION=SCFIFO
+  SELECTION :=SELECTION_SCFIFO
+endif
+
+ifdef SELECTION=NONE
+  SELECTION :=SELECTION_NONE
+endif
+
+ifndef SELECTION
+  SELECTION :=SELECTION_SCFIFO
+endif
+
+
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld

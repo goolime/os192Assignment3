@@ -11,11 +11,17 @@ void createNewPage(struct proc *p, uint vAdd);
 
 int swap(struct proc *p, uint va);
 
-int findPageToSwap();
+int findPageToSwap(struct proc *p);
 
 void fixPagedOutPTE(pde_t *pgdir, int vAdd);
 
 void fixPagedInPTE(struct proc *p, int vAdd, int pagePAddr);
+
+int getByLIFO(struct proc *p);
+
+int getBySCFIFO(struct proc *p);
+
+int getByDefault(struct proc *p);
 
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
@@ -285,7 +291,8 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz) {
             kfree(v);
             if (p->pid > 2) {
                 for (int i = 0; i < MAX_PSYC_PAGES; i++) {
-                    if (p->memPagesTable[i].isUsed && p->memPagesTable[i].vAdd == a && p->memPagesTable[i].pgdir == pgdir) {
+                    if (p->memPagesTable[i].isUsed && p->memPagesTable[i].vAdd == a &&
+                        p->memPagesTable[i].pgdir == pgdir) {
                         p->memPagesTable[i].isUsed = 0;
                         p->numOfMemPages--;
                     }
@@ -455,15 +462,16 @@ void createNewPage(struct proc *p, uint vAdd) {
             freeSpot = i;
             break;
         }
-    if(freeSpot == -1)
+    if (freeSpot == -1)
         panic("no space left");
     p->memPagesTable[freeSpot].vAdd = vAdd;
     p->memPagesTable[freeSpot].isUsed = 1;
+    p->memPagesTable[freeSpot].loadOrder = p->loadOrderCounter++;
 }
 
 
 int swap(struct proc *p, uint va) {
-    int indexToSwap = findPageToSwap();
+    int indexToSwap = findPageToSwap(p);
     int freeSpot = -1;
     for (int i = 0; i < MAX_PSYC_PAGES; i++)
         if (!p->filePagesTable[i].isUsed) {
@@ -491,14 +499,19 @@ int swap(struct proc *p, uint va) {
     return 1;
 }
 
-//default need to change in task3
-int findPageToSwap() {
-    struct proc *p = myproc();
-    for (int i = 0; i < MAX_PSYC_PAGES; i++) {
-        if (p->memPagesTable[i].isUsed)
-            return i;
-    }
-    return -1;
+
+int findPageToSwap(struct proc *p) {
+#ifdef SELECTION_LIFO
+    return getByLIFO(p);
+#endif
+#ifdef SELECTION_SCFIFO
+    cprintf("----SCFIFIO----");
+    return getBySCFIFO(p);
+#endif
+#ifdef SELECTION_NONE
+    return getByDefault(p);
+#endif
+    return 0;
 }
 
 void fixPagedOutPTE(pde_t *pgdir, int vAdd) {
@@ -523,7 +536,7 @@ void fixPagedInPTE(struct proc *p, int vAdd, int pagePAddr) {
     lcr3(V2P(p->pgdir));
 }
 
-int checkIfPageInsideFile(struct proc *p, int vAdd){
+int checkIfPageInsideFile(struct proc *p, int vAdd) {
     pte_t *pte = walkpgdir(p->pgdir, (int *) vAdd, 0);
     return (*pte & PTE_PG);
 }
@@ -540,7 +553,8 @@ void pageFromFile(struct proc *p, int vAdd) {
         if (!p->filePagesTable[i].isUsed) {
             freeSpot = i;
             break;
-        }for (int i = 0; i < MAX_PSYC_PAGES; i++)
+        }
+    for (int i = 0; i < MAX_PSYC_PAGES; i++)
         if (!p->filePagesTable[i].isUsed) {
             freeSpot = i;
             break;
@@ -555,9 +569,7 @@ void pageFromFile(struct proc *p, int vAdd) {
         return;
     }
 
-    //p->LocalPagedOut++;
-    int indexToSwap = findPageToSwap(); // select a page to swap to file
-    //cprintf("The chosen index is: %d\n", indexToSwap);
+    int indexToSwap = findPageToSwap(p); // select a page to swap to file
     struct PageInfo outPage = p->memPagesTable[indexToSwap];
     fixPagedInPTE(p, pageAddress, V2P(newAllocatedPage));
     readPageFromFile(p, pageAddress, indexToSwap, buff);
@@ -570,6 +582,54 @@ void pageFromFile(struct proc *p, int vAdd) {
     fixPagedOutPTE(p->pgdir, outPage.vAdd);
     char *v = P2V(outPagePA);
     kfree(v);
+}
+
+
+int getByDefault(struct proc *p) {
+    for (int i = 0; i < MAX_PSYC_PAGES; i++) {
+        if (p->memPagesTable[i].isUsed)
+            return i;
+    }
+    return -1;
+}
+
+
+int getByLIFO(struct proc *p) {
+    int pageIndex = -1;
+    uint loadOrder = 0;
+
+    for (int i = 0; i < MAX_PSYC_PAGES; i++) {
+        if (p->memPagesTable[i].isUsed && p->memPagesTable[i].loadOrder > loadOrder) {
+            loadOrder = p->memPagesTable[i].loadOrder;
+            pageIndex = i;
+        }
+    }
+    return pageIndex;
+}
+
+int getBySCFIFO(struct proc *p) {
+    int pageIndex = -1;
+    uint minLoadOrder = 0xffffffff;
+    int finish = 0;
+
+    while (!finish) {
+        for (int i = 0; i < MAX_PSYC_PAGES; i++) {
+            if (p->memPagesTable[i].isUsed && p->memPagesTable[i].loadOrder <= minLoadOrder) {
+                minLoadOrder = p->memPagesTable[i].loadOrder;
+                pageIndex = i;
+            }
+        }
+        pte_t *pte = walkpgdir(p->pgdir, (int *) p->memPagesTable[pageIndex].vAdd, 0);
+        if (*pte & PTE_A) {
+            p->memPagesTable[pageIndex].loadOrder = p->loadOrderCounter++;
+            *pte &= ~PTE_A;
+        } else {
+            finish = 1;
+        }
+    }
+
+    return pageIndex;
+
 }
 
 
